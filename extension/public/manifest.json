@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "LeetCode AI Analyzer",
+  "version": "0.1.0",
+  "description": "Analyze LeetCode run and submit requests with AI feedback in a side panel.",
+  "permissions": ["tabs"],
+  "host_permissions": [
+    "https://leetcode.com/*",
+    "http://127.0.0.1:8000/*",
+    "http://localhost:8000/*"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://leetcode.com/problems/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["injected.js"],
+      "matches": ["https://leetcode.com/*"]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "leetcode-ai-analyzer@example.com"
+    }
+  }
+}
