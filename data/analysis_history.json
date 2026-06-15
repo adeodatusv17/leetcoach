@@ -1,0 +1,15 @@
+{
+  "problems": [
+    {
+      "question_id": 449,
+      "title": "Serialize And Deserialize Bst",
+      "difficulty": "Unknown",
+      "user_pattern": "Depth-First Search (Pre-order Traversal for serialization, Recursive with bounds for deserialization)",
+      "optimal_pattern": "Depth-First Search (Pre-order Traversal for serialization, Recursive with bounds for deserialization)",
+      "time_complexity": "O(N)",
+      "space_complexity": "O(N)",
+      "optimal": true,
+      "timestamp": "2026-06-05T09:32:09.242223Z"
+    }
+  ]
+}

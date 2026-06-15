@@ -1,0 +1,29 @@
+{
+  "Hash Map": {
+    "related_questions": [1, 49, 128, 347]
+  },
+  "Two Pointers": {
+    "related_questions": [11, 15, 167, 283]
+  },
+  "Index Marking": {
+    "related_questions": [41, 442, 448, 645, 287]
+  },
+  "Sliding Window": {
+    "related_questions": [3, 76, 209, 438]
+  },
+  "DFS": {
+    "related_questions": [200, 695, 733, 130]
+  },
+  "BFS": {
+    "related_questions": [102, 127, 994, 752]
+  },
+  "Dynamic Programming": {
+    "related_questions": [53, 62, 198, 322]
+  },
+  "Greedy": {
+    "related_questions": [55, 134, 435, 452]
+  },
+  "Union Find": {
+    "related_questions": [200, 547, 684, 721]
+  }
+}
