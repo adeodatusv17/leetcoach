@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { createRoot } from 'react-dom/client'
 import { extensionRuntime } from './runtime'
 import type {
@@ -33,19 +33,23 @@ const styles = `
     width: ${PANEL_WIDTH}px;
     max-height: calc(100vh - 72px);
     overflow: auto;
-    background: #0f172a;
+    background: rgb(48, 28, 22);
     color: #e5e7eb;
     border: 1px solid rgba(148, 163, 184, 0.18);
     border-radius: 18px;
     box-shadow: 0 24px 56px rgba(2, 6, 23, 0.45);
     font: 14px/1.5 Inter, system-ui, sans-serif;
     transition: opacity 160ms ease, transform 160ms ease;
+    resize: both;
+    overflow: auto;
+    min-width: 100px;
+    min-height: 100px;
   }
 
   .lcai-launcher,
   .lcai-minimized {
     position: fixed;
-    right: 16px;
+    // right: 16px;
     z-index: 2147483646;
     display: flex;
     align-items: center;
@@ -59,13 +63,13 @@ const styles = `
   }
 
   .lcai-launcher {
-    top: 96px;
+    // top: 96px;
     padding: 10px 14px;
     cursor: pointer;
   }
 
   .lcai-minimized {
-    top: 56px;
+    // top: 56px;
     padding: 8px 10px 8px 14px;
   }
 
@@ -79,6 +83,7 @@ const styles = `
     top: 0;
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.94));
     backdrop-filter: blur(8px);
+    cursor: move;
   }
 
   .lcai-title {
@@ -102,8 +107,8 @@ const styles = `
     margin-bottom: 14px;
     padding: 14px;
     border-radius: 14px;
-    background: rgba(17, 24, 39, 0.72);
-    border: 1px solid rgba(148, 163, 184, 0.12);
+    background: #0a0a0a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     transition: border-color 160ms ease, transform 160ms ease;
   }
 
@@ -357,6 +362,128 @@ const styles = `
     border-radius: 999px;
     background: linear-gradient(90deg, #22c55e, #38bdf8);
   }
+    /* Main surfaces */
+.lcai-panel {
+  background: #090909;
+  color: #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55);
+}
+
+.lcai-launcher,
+.lcai-minimized {
+  background: #111111;
+  color: #fafafa;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lcai-header {
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 10, 0.98),
+    rgba(15, 15, 15, 0.95)
+  );
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lcai-card {
+  background: #121212;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Text */
+.lcai-title,
+.lcai-section-title,
+.lcai-value {
+  color: #fafafa;
+}
+
+.lcai-subtitle,
+.lcai-problem-meta,
+.lcai-muted,
+.lcai-empty {
+  color: #a1a1aa;
+}
+
+.lcai-label {
+  color: #71717a;
+}
+
+/* Links */
+.lcai-problem-link {
+  color: #60a5fa;
+}
+
+/* Chips */
+.lcai-chip {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e4e4e7;
+}
+
+.lcai-chip.ok {
+  background: rgba(34, 197, 94, 0.12);
+  color: #86efac;
+}
+
+.lcai-chip.warn {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fcd34d;
+}
+
+/* Buttons */
+.lcai-button,
+.lcai-action-tile {
+  background: #171717;
+  color: #f4f4f5;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lcai-button:hover:not(:disabled),
+.lcai-action-tile:hover:not(:disabled) {
+  background: #202020;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.lcai-button.secondary {
+  background: rgba(59, 130, 246, 0.12);
+  color: #93c5fd;
+}
+
+/* Code */
+.lcai-code {
+  background: #050505;
+  color: #e4e4e7;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Rows */
+.lcai-row + .lcai-row,
+.lcai-kv {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Icons */
+.lcai-icon-button {
+  color: #a1a1aa;
+}
+
+.lcai-icon-button:hover {
+  background: #1a1a1a;
+  color: #fafafa;
+}
+
+/* Progress */
+.lcai-progress-track {
+  background: #1f1f1f;
+}
+
+.lcai-progress-fill {
+  background: linear-gradient(
+    90deg,
+    #3b82f6,
+    #8b5cf6
+  );
+}
 `
 
 function injectPageBridge(): void {
@@ -544,6 +671,41 @@ function App(): React.JSX.Element {
   const [panelMode, setPanelMode] = useState<PanelMode>('open')
   const [state, setState] = useState<AnalysisState>({ status: 'idle' })
   const [detailPanels, setDetailPanels] = useState<DetailPanelsState>(defaultDetailPanelsState)
+  const [position, setPosition] = useState({
+  x: window.innerWidth - PANEL_WIDTH - 16,
+  y: 56,
+})
+
+const [dragging, setDragging] = useState(false)
+
+const dragOffset = useRef({
+  x: 0,
+  y: 0,
+})
+
+
+useEffect(() => {
+  if (!dragging) return
+
+  const handleMouseMove = (e: MouseEvent) => {
+    setPosition({
+      x: e.clientX - dragOffset.current.x,
+      y: e.clientY - dragOffset.current.y,
+    })
+  }
+
+  const handleMouseUp = () => {
+    setDragging(false)
+  }
+
+  window.addEventListener('mousemove', handleMouseMove)
+  window.addEventListener('mouseup', handleMouseUp)
+
+  return () => {
+    window.removeEventListener('mousemove', handleMouseMove)
+    window.removeEventListener('mouseup', handleMouseUp)
+  }
+}, [dragging])
 
   useEffect(() => {
     setDetailPanels(defaultDetailPanelsState())
@@ -810,17 +972,52 @@ function App(): React.JSX.Element {
     } satisfies RuntimeMessage)
   }
 
-  if (panelMode === 'closed') {
-    return (
-      <button className="lcai-launcher" type="button" onClick={() => setPanelMode('open')}>
-        AI Analysis
-      </button>
-    )
-  }
+if (panelMode === 'closed') {
+  return (
+    <button
+      className="lcai-launcher"
+      type="button"
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        right: 'auto',
+      }}
+      onMouseDown={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect()
 
+        dragOffset.current = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        }
+
+        setDragging(true)
+      }}
+      onClick={() => setPanelMode('open')}
+    >
+      AI Analysis
+    </button>
+  )
+}
   if (panelMode === 'minimized') {
     return (
-      <div className="lcai-minimized">
+      <div
+  className="lcai-minimized"
+  style={{
+    left: `${position.x}px`,
+    top: `${position.y}px`,
+    right: 'auto',
+  }}
+  onMouseDown={(e) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+
+    dragOffset.current = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    }
+
+    setDragging(true)
+  }}
+>
         <button className="lcai-icon-button" type="button" onClick={() => setPanelMode('open')} aria-label="Open AI Analysis">
           AI
         </button>
@@ -833,8 +1030,28 @@ function App(): React.JSX.Element {
   }
 
   return (
-    <aside className="lcai-panel">
-      <div className="lcai-header">
+    <aside
+  className="lcai-panel"
+  style={{
+    left: `${position.x}px`,
+    top: `${position.y}px`,
+    right: 'auto',
+  }}
+>
+        <div
+    className="lcai-header"
+    onMouseDown={(e) => {
+      const panel = e.currentTarget.parentElement as HTMLElement
+      const rect = panel.getBoundingClientRect()
+
+      dragOffset.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      }
+
+      setDragging(true)
+    }}
+  >
         <div>
           <h2 className="lcai-title">AI Analysis</h2>
           <p className="lcai-subtitle">{subtitle}</p>
