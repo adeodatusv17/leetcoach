@@ -40,7 +40,7 @@ The backend listens on `http://127.0.0.1:8000`.
 
 ## Notes
 
-- The backend currently targets Gemini, not OpenAI.
+- The backend currently targets Gemini, not OpenAI. 
 - The extension sends code, language, question id, and page URL to the backend for analysis, but the backend only persists metadata and pattern-level results.
 - Source code, test cases, cookies, session tokens, and account information are never stored in `data/`.
 - `data/analysis_history.json` stores one latest analysis record per question id.
